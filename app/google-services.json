@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "937569497896",
+    "firebase_url": "https://quantaxi-26307.firebaseio.com",
+    "project_id": "quantaxi-26307",
+    "storage_bucket": "quantaxi-26307.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:937569497896:android:3a57e65e550561e9",
+        "android_client_info": {
+          "package_name": "luongduongquan.com.quantaxi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "937569497896-20e6cghc3iigh69qmgf4jeq4et7efnbc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "luongduongquan.com.quantaxi",
+            "certificate_hash": "86a42df701ae16c38dd0ac6f24fd4c2c6b81ee46"
+          }
+        },
+        {
+          "client_id": "937569497896-ecu9snhlfl9h28ft9cbrj9672ilpqdpp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVFAdeaG12D4rtIrThNVv-7I9_AQFMtwk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "937569497896-ecu9snhlfl9h28ft9cbrj9672ilpqdpp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
