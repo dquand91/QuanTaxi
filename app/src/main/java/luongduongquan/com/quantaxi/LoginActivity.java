@@ -143,7 +143,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 						DatabaseReference userDataReference = FirebaseDatabase.getInstance().getReference().child(Common.USERS_TAG);
 						Intent intentMain;
 						if(tvLogin_Register.getText().equals("Customer Register")){
-							intentMain = new Intent(LoginActivity.this, MapActivity.class);
+							intentMain = new Intent(LoginActivity.this, CustomerMapActivity.class);
 							userDataReference.child(Common.CUSTOMER_TAG).child(user_id).setValue(true);
 						} else {
 							intentMain = new Intent(LoginActivity.this, DriverMapActivity.class);
@@ -186,7 +186,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 						Intent intentMain;
 						if(tvLogin_Register.getText().equals(Common.CUSTOMER_LOGIN_TITLE)){
-							intentMain = new Intent(LoginActivity.this, MapActivity.class);
+							intentMain = new Intent(LoginActivity.this, CustomerMapActivity.class);
 						} else {
 							intentMain = new Intent(LoginActivity.this, DriverMapActivity.class);
 						}
