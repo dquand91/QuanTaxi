@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity"
+    android:background="@drawable/background1">
+
+    <RelativeLayout
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="50dp">
+        <TextView
+            android:id="@+id/tvDriverLogin_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Login"
+            android:textColor="@android:color/white"
+            android:textSize="25sp"
+            android:layout_centerHorizontal="true"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:id="@+id/edtEmail_register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email..."
+            android:layout_below="@+id/tvDriverLogin_register"
+            android:layout_margin="5dp"/>
+
+        <EditText
+            android:id="@+id/edtPassword_register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password..."
+            android:layout_below="@+id/edtEmail_register"
+            android:layout_margin="5dp"/>
+
+        <LinearLayout
+            android:layout_below="@+id/edtPassword_register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnLogin_register"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="Login"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center_horizontal"/>
+            <TextView
+                android:id="@+id/tvDontHaveAccount_register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Don't have and Account?"
+                android:textColor="@android:color/holo_red_light"
+                android:layout_centerHorizontal="true"
+                android:textSize="17sp"
+                android:layout_marginTop="10dp"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"/>
+
+            <Button
+                android:id="@+id/btnRegister_register"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Register"
+                android:background="@android:color/holo_red_dark"
+                android:textColor="@android:color/white"
+                android:textSize="17sp"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"/>
+        </LinearLayout>
+
+
+
+    </RelativeLayout>
+
+
+
+
+
+</RelativeLayout>
