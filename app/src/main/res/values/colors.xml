@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ff12b6</color>
-    <color name="colorPrimaryDark">#c880ff</color>
-    <color name="colorAccent">#f2e712</color>
+    <color name="colorPrimary">#000000</color>
+    <color name="colorPrimaryDark">#0051ff</color>
+    <color name="colorAccent">#c90a00</color>
+
+    <color name="bottomText">#7d7c80</color>
+    <color name="btnSignin">#00c4ff</color>
+    <color name="btnRegister">#848a8c</color>
+
+    <color name="rippleColor">#006aff</color>
 </resources>
