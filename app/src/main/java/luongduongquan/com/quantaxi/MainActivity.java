@@ -1,5 +1,6 @@
 package luongduongquan.com.quantaxi;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -99,6 +100,11 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
+				btnSignin.setEnabled(false);
+
+				final ProgressDialog loadingDialog = new ProgressDialog(MainActivity.this);
+				loadingDialog.setTitle("Loading...");
+				loadingDialog.show();
 
 				// Check validation
 				if(TextUtils.isEmpty(edtEmail.getText().toString())){
@@ -114,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
 						.addOnSuccessListener(new OnSuccessListener<AuthResult>() {
 							@Override
 							public void onSuccess(AuthResult authResult) {
+								loadingDialog.dismiss();
 								startActivity(new Intent(MainActivity.this, Welcome.class));
 								finish();
 							}
@@ -121,7 +128,9 @@ public class MainActivity extends AppCompatActivity {
 						.addOnFailureListener(new OnFailureListener() {
 							@Override
 							public void onFailure(@NonNull Exception e) {
+								loadingDialog.dismiss();
 								Snackbar.make(rootLayout, "Login Fail!", Snackbar.LENGTH_SHORT).show();
+								btnSignin.setEnabled(true);
 							}
 						});
 
@@ -160,6 +169,9 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
+				final ProgressDialog loadingDialog = new ProgressDialog(MainActivity.this);
+				loadingDialog.setTitle("Loading...");
+				loadingDialog.show();
 
 				// Check validation
 				if(TextUtils.isEmpty(edtEmail.getText().toString())){
@@ -197,12 +209,14 @@ public class MainActivity extends AppCompatActivity {
 										.addOnSuccessListener(new OnSuccessListener<Void>() {
 											@Override
 											public void onSuccess(Void aVoid) {
+												loadingDialog.dismiss();
 												Snackbar.make(rootLayout, "Register successfully!", Snackbar.LENGTH_SHORT).show();
 											}
 										})
 										.addOnFailureListener(new OnFailureListener() {
 										@Override
 										public void onFailure(@NonNull Exception e) {
+											loadingDialog.dismiss();
 											Snackbar.make(rootLayout, "Register Fail!", Snackbar.LENGTH_SHORT).show();
 										}
 								});
@@ -211,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
 						.addOnFailureListener(new OnFailureListener() {
 							@Override
 							public void onFailure(@NonNull Exception e) {
+								loadingDialog.dismiss();
 								Snackbar.make(rootLayout, "Register Fail!", Snackbar.LENGTH_SHORT).show();
 							}
 				});
