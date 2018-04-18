@@ -38,10 +38,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Welcome"
-            android:label="@string/title_activity_welcome">
-        </activity>
+
+        <activity android:name=".MapActivity"/>
+        <activity android:name=".DriverMapActivity"/>
+        <activity android:name=".CustomerLoginActivity"/>
+        <activity android:name=".DriverLoginActivity"/>
+
     </application>
 
 </manifest>
