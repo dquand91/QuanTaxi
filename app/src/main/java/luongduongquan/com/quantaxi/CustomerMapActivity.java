@@ -24,11 +24,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.List;
 
 public class CustomerMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
@@ -116,15 +122,16 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
                     driverFound = true;
                     driverFoundID = key;
 
-                    // Đẩy lên FireBase để xác định Driver này đang chở Customer với ID bao nhiu
-//                    DatabaseReference driverRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverFoundID);
-//                    String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-//                    HashMap map = new HashMap();
-//                    map.put("customerRideId", customerId);
-//                    driverRef.updateChildren(map);
+                    // Đẩy lên FireBase để xác định Driver này đang chở Customer có ID bao nhiu
+                    // Và kéo theo cái location của customer vào trong driver
+                    DatabaseReference driverRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverFoundID);
+                    String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    HashMap map = new HashMap();
+                    map.put("customerRideId", customerId);
+                    driverRef.updateChildren(map);
 
-//                    getDriverLocation();
-//                    mRequest.setText("Looking for Driver Location....");
+                    getDriverLocation(); // Sau khi đã thêm dữ liệu driver đang chở User nào => sẽ tìm vị trí của Driver đó.
+                    btnRequest.setText("Looking for Driver Location....");
 
                 }
             }
@@ -158,6 +165,46 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
         });
     }
 
+    private Marker mDriverMarker;
+    private void getDriverLocation(){
+        // Sau khi đã thêm dữ liệu driver đang chở User nào => sẽ tìm vị trí của Driver đó.
+        // Để tìm và update lên FireBase vị trí của Driver đang chở Customer này
+        // Dựa vào bảng "driversWorking" để lấy được thông tin id, location của driver đang đón mình
+        // Bảng driversWorking này được tạo ở bên DriverMapAcivity
+
+        DatabaseReference driverLocationRef = FirebaseDatabase.getInstance().getReference().child("driversWorking").child(driverFoundID).child("l");
+        driverLocationRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    List<Object> map = (List<Object>) dataSnapshot.getValue();
+                    double locationLat = 0;
+                    double locationLng = 0;
+                    btnRequest.setText("Driver Found");
+                    if(map.get(0) != null){
+                        locationLat = Double.parseDouble(map.get(0).toString());
+                    }
+                    if(map.get(1) != null){
+                        locationLng = Double.parseDouble(map.get(1).toString());
+                    }
+                    LatLng driverLatLng = new LatLng(locationLat,locationLng);
+                    if(mDriverMarker != null){
+                        mDriverMarker.remove();
+                    }
+
+                    // Sau khi lấy được thông tin Driver, mình tiến hành gắn 1 cái marker driver lên màn hình của customer.
+                    mDriverMarker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("your driver"));
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+    }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -187,15 +234,15 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
             LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
 
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
         }
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000);
-        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(10000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
