@@ -23,6 +23,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -46,6 +47,12 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
     private Button mLogout, btnRequest;
 
     private LatLng pickupLocation;
+
+    private Boolean requestBol = false;
+
+    GeoQuery geoQuery;
+
+    private Marker pickupMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,24 +80,80 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
         btnRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
-                GeoFire geoFire = new GeoFire(ref);
-                geoFire.setLocation(userId, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()), new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
+                if(requestBol){
+                    requestBol = false;
+                    geoQuery.removeAllListeners();
+                    driverLocationRef.removeEventListener(driverLocationRefListener);
+
+
+                    if (driverFoundID != null){
+                        DatabaseReference driverRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverFoundID);
+                        driverRef.setValue(true);
+                        driverFoundID = null;
 
                     }
-                });
+                    driverFound = false;
+                    radius = 1;
+                    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here"));
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
+                    GeoFire geoFire = new GeoFire(ref);
+                    geoFire.removeLocation(userId, new GeoFire.CompletionListener() {
+                        @Override
+                        public void onComplete(String key, DatabaseError error) {
 
-                btnRequest.setText("Getting your Driver....");
-                // Sau khi customer bấm tìm xe.
-                // Mình sẽ dùng GeoFire để lên FireBase Database server và tìm ở bảng "driversAvailable" để lấy ra những driver gần nhất.
-                getClosestDriver();
+                        }
+                    });
+
+                    if(pickupMarker != null){
+                        pickupMarker.remove();
+                    }
+                    if (mDriverMarker != null){
+                        mDriverMarker.remove();
+                    }
+                    btnRequest.setText("Book a car");
+                }else {
+
+                    requestBol = true;
+
+                    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
+                    GeoFire geoFire = new GeoFire(ref);
+                    geoFire.setLocation(userId, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()), new GeoFire.CompletionListener() {
+                        @Override
+                        public void onComplete(String key, DatabaseError error) {
+
+                        }
+                    });
+
+                    pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    pickupMarker = mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pickup)));
+
+                    btnRequest.setText("Getting your Driver....");
+
+                    getClosestDriver();
+
+                }
+//                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+//
+//                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
+//                GeoFire geoFire = new GeoFire(ref);
+//                geoFire.setLocation(userId, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()), new GeoFire.CompletionListener() {
+//                    @Override
+//                    public void onComplete(String key, DatabaseError error) {
+//
+//                    }
+//                });
+//
+//                pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+//                mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here"));
+//
+//                btnRequest.setText("Getting your Driver....");
+//                // Sau khi customer bấm tìm xe.
+//                // Mình sẽ dùng GeoFire để lên FireBase Database server và tìm ở bảng "driversAvailable" để lấy ra những driver gần nhất.
+//                getClosestDriver();
             }
         });
     }
@@ -108,7 +171,7 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
         GeoFire geoFire = new GeoFire(driverLocation);
 
         // Tạo ra 1 đường tròn bán kính là radius (ở đây mình gán là 1 (km)). Tâm là điểm đứng hiện tại của user (pickupLocation).
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(pickupLocation.latitude, pickupLocation.longitude), radius);
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(pickupLocation.latitude, pickupLocation.longitude), radius);
         geoQuery.removeAllListeners(); // Xóa hết các listener để tránh bị lỗi trước đó.
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
@@ -166,14 +229,18 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
     }
 
     private Marker mDriverMarker;
+    private DatabaseReference driverLocationRef;
+    private ValueEventListener driverLocationRefListener;
+
+
     private void getDriverLocation(){
         // Sau khi đã thêm dữ liệu driver đang chở User nào => sẽ tìm vị trí của Driver đó.
         // Để tìm và update lên FireBase vị trí của Driver đang chở Customer này
         // Dựa vào bảng "driversWorking" để lấy được thông tin id, location của driver đang đón mình
         // Bảng driversWorking này được tạo ở bên DriverMapAcivity
 
-        DatabaseReference driverLocationRef = FirebaseDatabase.getInstance().getReference().child("driversWorking").child(driverFoundID).child("l");
-        driverLocationRef.addValueEventListener(new ValueEventListener() {
+        driverLocationRef = FirebaseDatabase.getInstance().getReference().child("driversWorking").child(driverFoundID).child("l");
+        driverLocationRefListener = driverLocationRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
@@ -190,6 +257,22 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
                     LatLng driverLatLng = new LatLng(locationLat,locationLng);
                     if(mDriverMarker != null){
                         mDriverMarker.remove();
+                    }
+
+                    Location loc1 = new Location("");
+                    loc1.setLatitude(pickupLocation.latitude);
+                    loc1.setLongitude(pickupLocation.longitude);
+
+                    Location loc2 = new Location("");
+                    loc2.setLatitude(driverLatLng.latitude);
+                    loc2.setLongitude(driverLatLng.longitude);
+
+                    float distance = loc1.distanceTo(loc2);
+
+                    if (distance<500){
+                        btnRequest.setText("Driver ARRIVED! " + String.valueOf(distance));
+                    } else {
+                        btnRequest.setText("Driver Found: " + String.valueOf(distance));
                     }
 
                     // Sau khi lấy được thông tin Driver, mình tiến hành gắn 1 cái marker driver lên màn hình của customer.
@@ -241,8 +324,8 @@ public class CustomerMapActivity extends FragmentActivity implements OnMapReadyC
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(10000);
+        mLocationRequest.setInterval(2000);
+        mLocationRequest.setFastestInterval(2000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
